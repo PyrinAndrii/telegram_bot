@@ -6,7 +6,6 @@ require 'rest-client'
 module Weather
   module API
     class Base
-      SUCCESS_RESPONSE_CODE = 200
       APPID = ENV['OPEN_WEATHER_MAP_API_TOKEN']
 
       attr_reader :city, :request_url, :response
