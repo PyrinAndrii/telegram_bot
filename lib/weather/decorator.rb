@@ -34,7 +34,7 @@ module Weather
   end
 end
 
-# for testing
+# TODO: for testing, delete later
 =begin
 require './lib/weather/decorator'
 d = Weather::Decorator.new('lviv')
