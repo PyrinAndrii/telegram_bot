@@ -8,7 +8,7 @@ module Weather
     attr_reader :city, :parsed_response
 
     def_delegators :parsed_weather,   :main, :description
-    def_delegators :parsed_response,  :cod, :message
+    def_delegators :parsed_response,  :cod,  :message
     def_delegators :parsed_main_data, :temp, :temp_min, :temp_max, :feels_like
 
     def initialize(city)

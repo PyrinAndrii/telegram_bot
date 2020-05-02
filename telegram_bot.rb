@@ -1,87 +1,71 @@
 require 'telegram/bot'
-require 'pry' # TODO: just for debugging
+require 'pry' # TODO: just for debugging, delete later
 
 class TelegramBot
   TOKEN = ENV['TELEGRAM_BOT_API_TOKEN']
+
+  START            = '/start'
+  STOP             = '/stop'
   CURRENT_WEATHER  = 'Current weather'
   WEATHER_FORECAST = 'Weather forecast'
 
-  attr_reader :city, :chat_id
+  # match if command start with '/city', has a space and 1 or more letters
+  CITY_REGEXP = /^\/city \w+/
 
-  # TODO: just hint, will delete later
-  # def run
-  #   bot.listen do |message|
-  #     # case message.text
-  #     # when '/start'
-  #       bot.api.sendMessage(chat_id: message.chat.id, text: "Hello, #{message.from.first_name}")
-  #       weather_message(message)
-  #
-  #       bot.logger.info("Bot has sent message to: #{message.from.first_name}")
-  #     # end
-  #   end
-  # end
+  attr_reader :city, :chat_id
 
   def run
     bot.listen do |message|
-      case message
-      when Telegram::Bot::Types::CallbackQuery
-        @chat_id = message.message.chat.id
+      @chat_id ||= message.chat.id
 
-        if message.data == 'current'
-          current_weather
-        elsif message.data == 'forecast'
-          weather_forecast # TODO: finish implementation of weather forecast
-        end
-      when Telegram::Bot::Types::Message
-        @chat_id = message.chat.id
-        ask_type_of_weather
+      case message.text
+      when START
+        question = "Do you want to know #{CURRENT_WEATHER} or #{WEATHER_FORECAST}?"
+
+        bot.api.send_message(chat_id: chat_id, text: question, reply_markup: weather_keyboard)
+      when STOP
+        good_by
+      when CITY_REGEXP
+        city_name(message.text)
+
+        bot.api.send_message(chat_id: chat_id, text: choose_forecast_type)
+
+        # TODO: add logger
+        # bot.logger.info("Bot has sent message to: #{message.from.first_name}")
+      when CURRENT_WEATHER
+        tell_current_weather
+      when WEATHER_FORECAST
+        tell_weather_forecast
+      else
+        tell_instruction
       end
     end
   end
 
-  def ask_type_of_weather
-    bot.api.send_message(
-      chat_id: chat_id,
-      text: 'Do you want to know current weather, or forecast?',
-      reply_markup: markup
-    )
+  def weather_keyboard
+    Telegram::Bot::Types::ReplyKeyboardMarkup
+      .new(keyboard: [CURRENT_WEATHER, WEATHER_FORECAST], one_time_keyboard: true)
   end
 
-  def markup
-    Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: weather_buttons)
+  def city_name(text)
+    @city = text.gsub('/city', '').strip.tr(' ', '+')
   end
 
-  def weather_buttons
-    [
-      Telegram::Bot::Types::InlineKeyboardButton.new(text: CURRENT_WEATHER,  callback_data: 'current'),
-      Telegram::Bot::Types::InlineKeyboardButton.new(text: WEATHER_FORECAST, callback_data: 'forecast')
-    ]
+  def good_by
+    delete_keyboard = Telegram::Bot::Types::ReplyKeyboardRemove.new(remove_keyboard: true)
+
+    bot.api.send_message(chat_id: chat_id, text: 'Sorry to see you go :(', reply_markup: delete_keyboard)
   end
 
-  def current_weather
-    enter_city
-
-    tell_weather
+  def choose_forecast_type
+    "Next type /start and choose either #{CURRENT_WEATHER} or #{WEATHER_FORECAST}"
   end
 
-  # TODO: finish implementation of weather forecast
-  # def weather_forecast(callback_data)
-  #   enter_city
-  #   return 'doesn`t work currently, in progress'
-  #
-  #   weather_message(city)
-  # end
+  def tell_instruction
+    instruction = "Please type /city {city_name} where 'city_name' is the city you want to know the weather about\n"
+    instruction += choose_forecast_type
 
-  def enter_city
-    bot.api.sendMessage(chat_id: chat_id, text: 'Please enter your city')
-    @city = 'lviv' # TODO: implement entering city
-
-    # bot.listen do |message|
-    #   p chat_id
-    #   p message
-    #   @city = message.message.text.strip.tr(' ', '+')
-    #   p city
-    # end
+    bot.api.send_message(chat_id: chat_id, text: instruction)
   end
 
   private
@@ -90,11 +74,28 @@ class TelegramBot
     @bot ||= Telegram::Bot::Client.run(TOKEN, logger: Logger.new($stderr)) { |bot| return bot }
   end
 
-  def weather_info
+  def tell_weather_forecast
+    return tell_instruction unless city
+
+    bot.api.sendMessage(chat_id: chat_id, text: weather_forecast_info)
+  end
+
+  def tell_current_weather
+    return tell_instruction unless city
+
+    bot.api.sendMessage(chat_id: chat_id, text: current_weather_info)
+  end
+
+  def current_weather_info
     Weather::Decorator.new(city).tell_current_weather
   end
 
-  def tell_weather
-    bot.api.sendMessage(chat_id: chat_id, text: weather_info)
+  def weather_forecast_info
+    Weather::Decorator.new(city).tell_weather_forecast
+  end
+
+# TODO: make method for sending messages
+  def send_message(text, *options)
+    # bot.api.send_message(chat_id: chat_id, text: text, options)
   end
 end
