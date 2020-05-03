@@ -1,5 +1,4 @@
-require_relative 'presenters/main'
-require_relative 'presenters/weather'
+require_relative 'weather_parser'
 
 require 'json'
 
@@ -7,8 +6,7 @@ module Weather
   class ResponseParser
     SUCCESS_RESPONSE_CODE = 200
 
-    attr_reader :wind, :dt, :cod, :parsed_weather,
-                :parsed_main_data, :message, :name
+    attr_reader :cod, :current_weather, :forecast_list, :message
 
     def initialize(resp)
       response = JSON.parse(resp, symbolize_names: true)
@@ -19,11 +17,19 @@ module Weather
     end
 
     def parse_data(response)
-      @dt   = response.dig(:dt)
-      @wind = response.dig(:wind, :speed)
-      @name = response.dig(:name)
-      @parsed_main_data = Presenters::Main.new(response.dig(:main))
-      @parsed_weather   = Presenters::Weather.new(response.dig(:weather))
+      text_list = response.dig(:list)
+      # binding.pry
+      return parse_current_weather(response) unless text_list
+
+      @forecast_list = text_list.map { |item| parse_item(item) }
+    end
+
+    def parse_current_weather(response)
+      @current_weather = WeatherParser.new(response)
+    end
+
+    def parse_item(item)
+      WeatherParser.new(item)
     end
 
     def error_message(response)

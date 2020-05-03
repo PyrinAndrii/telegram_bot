@@ -1,6 +1,7 @@
 require_relative 'presenters/main'
 require_relative 'presenters/weather'
 
+require 'forwardable'
 require 'date'
 
 module Weather
@@ -10,7 +11,7 @@ module Weather
     CURRENT_WEATHER  = 'Current weather'
     WEATHER_FORECAST = 'Weather forecast'
 
-    attr_reader :type, :wind, :parsed_weather, :parsed_main_data
+    attr_reader :type, :date_time, :wind, :parsed_weather, :parsed_main_data
 
     def_delegators :parsed_weather,   :main, :description
     def_delegators :parsed_main_data, :temp, :temp_min, :temp_max, :feels_like
