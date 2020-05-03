@@ -8,10 +8,10 @@ module Weather
       end
 
       def parse_data(main)
-        @temp       = main[:temp]
-        @temp_min   = main[:temp_min]
-        @temp_max   = main[:temp_max]
-        @feels_like = main[:feels_like]
+        @temp       = main[:temp].to_f
+        @temp_min   = main[:temp_min].to_f
+        @temp_max   = main[:temp_max].to_f
+        @feels_like = main[:feels_like].to_f
       end
     end
   end
