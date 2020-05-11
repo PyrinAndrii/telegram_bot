@@ -18,7 +18,7 @@ module Weather
 
     def parse_data(response)
       text_list = response.dig(:list)
-      # binding.pry
+
       return parse_current_weather(response) unless text_list
 
       @forecast_list = text_list.map { |item| parse_item(item) }

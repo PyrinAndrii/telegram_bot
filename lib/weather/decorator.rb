@@ -1,3 +1,4 @@
+require_relative 'per_day_parser'
 require_relative 'response_parser'
 require_relative 'api/current_weather'
 require_relative 'api/weather_forecast'
@@ -5,6 +6,8 @@ require_relative 'api/weather_forecast'
 module Weather
   class Decorator
     extend Forwardable
+
+    MAX_MESSAGE_LENGTH = 4096
 
     attr_reader :city, :parsed_response
 
@@ -32,12 +35,15 @@ module Weather
 
       return message unless cod == ResponseParser::SUCCESS_RESPONSE_CODE
 
-      # TODO: implement better weather forecast, not so long!!!
-      # parsed_response.forecast_list.map do |w|
-      parsed_response.forecast_list.first(3).map do |w|
-        "#{w.date_time} in #{city} will be #{w.temp}°C, but feels like #{w.feels_like}°C. "\
-        "Also there will be #{w.description}"
+      per_day = PerDayParser.new(parsed_response.forecast_list).average_weather_per_day
+
+      text = per_day.map do |day, weather|
+        "#{day} in #{city} will be #{weather.temp}°C, but feels like #{weather.feels_like}°C. "\
+        "Also there will be #{weather.description}"
       end.join("\n")
+
+      return message_to_long if text.length >= MAX_MESSAGE_LENGTH
+      text
     end
 
     def parse_response(response)
@@ -50,6 +56,10 @@ module Weather
 
     def parsed_main_data
       parsed_response.parsed_main_data
+    end
+
+    def message_to_long
+      'Sorry message is too long'
     end
   end
 end

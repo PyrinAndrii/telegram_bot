@@ -1,3 +1,5 @@
+require_relative './lib/weather/decorator'
+
 require 'telegram/bot'
 require 'pry' # TODO: just for debugging, delete later
 
