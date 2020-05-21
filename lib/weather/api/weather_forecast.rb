@@ -1,5 +1,3 @@
-require_relative 'base'
-
 module Weather
   module API
     class WeatherForecast < Base

@@ -1,6 +1,3 @@
-require_relative 'base'
-require_relative '../response_parser'
-
 module Weather
   module API
     class CurrentWeather < Base

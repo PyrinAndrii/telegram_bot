@@ -1,8 +1,3 @@
-require_relative 'per_day_parser'
-require_relative 'response_parser'
-require_relative 'api/current_weather'
-require_relative 'api/weather_forecast'
-
 module Weather
   class Decorator
     extend Forwardable

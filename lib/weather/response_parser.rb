@@ -1,7 +1,3 @@
-require_relative 'weather_parser'
-
-require 'json'
-
 module Weather
   class ResponseParser
     SUCCESS_RESPONSE_CODE = 200

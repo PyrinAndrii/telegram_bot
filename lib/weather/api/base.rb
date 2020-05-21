@@ -1,8 +1,3 @@
-# TODO: delete it later. Just for testing
-require 'dotenv/load'
-
-require 'rest-client'
-
 module Weather
   module API
     class Base

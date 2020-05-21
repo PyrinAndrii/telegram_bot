@@ -1,9 +1,3 @@
-require_relative 'presenters/main'
-require_relative 'presenters/weather'
-
-require 'forwardable'
-require 'date'
-
 module Weather
   class WeatherParser
     extend Forwardable

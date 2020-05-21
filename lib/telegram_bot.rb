@@ -1,8 +1,3 @@
-require_relative './lib/weather/decorator'
-
-require 'telegram/bot'
-require 'pry' # TODO: just for debugging, delete later
-
 class TelegramBot
   TOKEN = ENV['TELEGRAM_BOT_API_TOKEN']
 
