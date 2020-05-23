@@ -1,13 +1,8 @@
 class TelegramBot
   TOKEN = ENV['TELEGRAM_BOT_API_TOKEN']
 
-  START            = '/start'
-  STOP             = '/stop'
-  CURRENT_WEATHER  = 'Current weather'
-  WEATHER_FORECAST = 'Weather forecast'
-
-  # match if command start with '/city', has a space and 1 or more letters
-  CITY_REGEXP = /^\/city \w+/
+  START = '/start'
+  STOP  = '/stop'
 
   attr_reader :city, :chat_id
 
@@ -19,13 +14,13 @@ class TelegramBot
       when START
         question = "Do you want to know #{CURRENT_WEATHER} or #{WEATHER_FORECAST}?"
 
-        bot.api.send_message(chat_id: chat_id, text: question, reply_markup: weather_keyboard)
+        send_message(question, reply_markup: weather_keyboard)
       when STOP
         good_by
       when CITY_REGEXP
         city_name(message.text)
 
-        bot.api.send_message(chat_id: chat_id, text: choose_forecast_type)
+        send_message(choose_forecast_type)
 
         # TODO: add logger
         # bot.logger.info("Bot has sent message to: #{message.from.first_name}")
@@ -51,7 +46,7 @@ class TelegramBot
   def good_by
     delete_keyboard = Telegram::Bot::Types::ReplyKeyboardRemove.new(remove_keyboard: true)
 
-    bot.api.send_message(chat_id: chat_id, text: 'Sorry to see you go :(', reply_markup: delete_keyboard)
+    send_message('Sorry to see you go :(', reply_markup: delete_keyboard)
   end
 
   def choose_forecast_type
@@ -62,7 +57,7 @@ class TelegramBot
     instruction = "Please type /city {city_name} where 'city_name' is the city you want to know the weather about\n"
     instruction += choose_forecast_type
 
-    bot.api.send_message(chat_id: chat_id, text: instruction)
+    send_message(instruction)
   end
 
   private
@@ -74,13 +69,13 @@ class TelegramBot
   def tell_weather_forecast
     return tell_instruction unless city
 
-    bot.api.sendMessage(chat_id: chat_id, text: weather_forecast_info)
+    send_message(weather_forecast_info)
   end
 
   def tell_current_weather
     return tell_instruction unless city
 
-    bot.api.sendMessage(chat_id: chat_id, text: current_weather_info)
+    send_message(current_weather_info)
   end
 
   def current_weather_info
@@ -91,8 +86,10 @@ class TelegramBot
     Weather::Decorator.new(city).tell_weather_forecast
   end
 
-# TODO: make method for sending messages
-  def send_message(text, *options)
-    # bot.api.send_message(chat_id: chat_id, text: text, options)
+  def send_message(text, **options)
+    required_options = { chat_id: chat_id, text: text }
+    options.merge! required_options
+
+    bot.api.send_message(options)
   end
 end

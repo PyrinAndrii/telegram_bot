@@ -13,6 +13,7 @@ require 'pry'
 Dir[File.join(__dir__, 'weather', 'presenters', '*.rb')].each { |file| require file }
 Dir[File.join(__dir__, 'weather', 'api', '*.rb')].each { |file| require file }
 Dir[File.join(__dir__, 'weather', '*.rb')].each { |file| require file }
+require File.join(__dir__, 'common_constants')
 require File.join(__dir__, 'telegram_bot')
 
 # run the bot

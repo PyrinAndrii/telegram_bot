@@ -1,6 +1,5 @@
 module Weather
   class ResponseParser
-    SUCCESS_RESPONSE_CODE = 200
 
     attr_reader :cod, :current_weather, :forecast_list, :message
 

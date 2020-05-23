@@ -2,9 +2,6 @@ module Weather
   class WeatherParser
     extend Forwardable
 
-    CURRENT_WEATHER  = 'Current weather'
-    WEATHER_FORECAST = 'Weather forecast'
-
     attr_reader :type, :date_time, :wind, :parsed_weather, :parsed_main_data
 
     def_delegators :parsed_weather,   :main, :description

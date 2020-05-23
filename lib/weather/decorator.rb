@@ -2,8 +2,6 @@ module Weather
   class Decorator
     extend Forwardable
 
-    MAX_MESSAGE_LENGTH = 4096
-
     attr_reader :city, :parsed_response
 
     def_delegators :parsed_response, :cod, :message
@@ -16,7 +14,7 @@ module Weather
       response = API::CurrentWeather.new(city).response
       parse_response(response)
 
-      return message unless cod == ResponseParser::SUCCESS_RESPONSE_CODE
+      return message unless cod == SUCCESS_RESPONSE_CODE
 
       current = parsed_response.current_weather
 
@@ -28,7 +26,7 @@ module Weather
       response = API::WeatherForecast.new(city).response
       parse_response(response)
 
-      return message unless cod == ResponseParser::SUCCESS_RESPONSE_CODE
+      return message unless cod == SUCCESS_RESPONSE_CODE
 
       per_day = PerDayParser.new(parsed_response.forecast_list).average_weather_per_day
 
@@ -58,9 +56,3 @@ module Weather
     end
   end
 end
-
-# TODO: for testing, delete later
-=begin
-require './lib/weather/decorator'
-d = Weather::Decorator.new('lviv')
-=end
