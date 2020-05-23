@@ -79,11 +79,21 @@ class TelegramBot
   end
 
   def current_weather_info
-    Weather::Decorator.new(city).tell_current_weather
+    response = ::Weather::API::CurrentWeather.new(city).response
+    parsed_response = ::Weather::ResponseParser.new(response.body)
+
+    return parsed_response.error if parsed_response.failure?
+
+    ::Weather::Decorator.new(city).tell_current_weather(parsed_response)
   end
 
   def weather_forecast_info
-    Weather::Decorator.new(city).tell_weather_forecast
+    response = ::Weather::API::WeatherForecast.new(city).response
+    parsed_response = ::Weather::ResponseParser.new(response.body)
+
+    return parsed_response.error if parsed_response.failure?
+
+    ::Weather::Decorator.new(city).tell_weather_forecast(parsed_response)
   end
 
   def send_message(text, **options)

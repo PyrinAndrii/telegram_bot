@@ -2,33 +2,22 @@ module Weather
   class Decorator
     extend Forwardable
 
-    attr_reader :city, :parsed_response
-
-    def_delegators :parsed_response, :cod, :message
+    attr_reader :city
 
     def initialize(city)
       @city = city
     end
 
-    def tell_current_weather
-      response = API::CurrentWeather.new(city).response
-      parse_response(response)
-
-      return message unless cod == SUCCESS_RESPONSE_CODE
-
+    def tell_current_weather(parsed_response)
       current = parsed_response.current_weather
 
       "Now in #{city} is #{current.temp}°C, but feels like #{current.feels_like}°C. "\
       "Also now is #{current.description}"
     end
 
-    def tell_weather_forecast
-      response = API::WeatherForecast.new(city).response
-      parse_response(response)
-
-      return message unless cod == SUCCESS_RESPONSE_CODE
-
-      per_day = PerDayParser.new(parsed_response.forecast_list).average_weather_per_day
+    def tell_weather_forecast(parsed_response)
+      per_day = PerDayParser.new(parsed_response.forecast_list)
+                            .average_weather_per_day
 
       text = per_day.map do |day, weather|
         "#{day} in #{city} will be #{weather.temp}°C, but feels like #{weather.feels_like}°C. "\
@@ -36,19 +25,8 @@ module Weather
       end.join("\n")
 
       return message_to_long if text.length >= MAX_MESSAGE_LENGTH
+
       text
-    end
-
-    def parse_response(response)
-      @parsed_response = ResponseParser.new(response.body)
-    end
-
-    def parsed_weather
-      parsed_response.parsed_weather
-    end
-
-    def parsed_main_data
-      parsed_response.parsed_main_data
     end
 
     def message_to_long
