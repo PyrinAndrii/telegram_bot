@@ -4,7 +4,15 @@ class TelegramBot
   START = '/start'
   STOP  = '/stop'
 
-  attr_reader :city, :chat_id
+  WEATHER_API = {
+    CURRENT_WEATHER  => ::Weather::API::CurrentWeather,
+    WEATHER_FORECAST => ::Weather::API::WeatherForecast
+  }
+
+  WEATHER_METHOD = {
+    CURRENT_WEATHER  => :tell_current_weather,
+    WEATHER_FORECAST => :tell_weather_forecast
+  }
 
   def run
     bot.listen do |message|
@@ -24,19 +32,36 @@ class TelegramBot
 
         # TODO: add logger
         # bot.logger.info("Bot has sent message to: #{message.from.first_name}")
-      when CURRENT_WEATHER
-        tell_current_weather
-      when WEATHER_FORECAST
-        tell_weather_forecast
+      when CURRENT_WEATHER, WEATHER_FORECAST
+        tell_instruction unless city
+
+        send_message(weather_info(message.text))
       else
         tell_instruction
       end
     end
   end
 
+  private
+
+  attr_reader :city, :chat_id
+
+  def bot
+    @bot ||= Telegram::Bot::Client.run(TOKEN, logger: Logger.new($stderr)) { |bot| return bot }
+  end
+
+  def weather_info(forecast_type)
+    response = WEATHER_API[forecast_type].new(city).response
+    parsed_response = ::Weather::ResponseParser.new(response.body)
+
+    parsed_response.error || decorator.send(WEATHER_METHOD[forecast_type],
+                                            parsed_response)
+  end
+
   def weather_keyboard
-    Telegram::Bot::Types::ReplyKeyboardMarkup
-      .new(keyboard: [CURRENT_WEATHER, WEATHER_FORECAST], one_time_keyboard: true)
+    Telegram::Bot::Types::ReplyKeyboardMarkup.new(
+      keyboard: [CURRENT_WEATHER, WEATHER_FORECAST], one_time_keyboard: true
+    )
   end
 
   def city_name(text)
@@ -60,40 +85,8 @@ class TelegramBot
     send_message(instruction)
   end
 
-  private
-
-  def bot
-    @bot ||= Telegram::Bot::Client.run(TOKEN, logger: Logger.new($stderr)) { |bot| return bot }
-  end
-
-  def tell_weather_forecast
-    return tell_instruction unless city
-
-    send_message(weather_forecast_info)
-  end
-
-  def tell_current_weather
-    return tell_instruction unless city
-
-    send_message(current_weather_info)
-  end
-
-  def current_weather_info
-    response = ::Weather::API::CurrentWeather.new(city).response
-    parsed_response = ::Weather::ResponseParser.new(response.body)
-
-    return parsed_response.error if parsed_response.failure?
-
-    ::Weather::Decorator.new(city).tell_current_weather(parsed_response)
-  end
-
-  def weather_forecast_info
-    response = ::Weather::API::WeatherForecast.new(city).response
-    parsed_response = ::Weather::ResponseParser.new(response.body)
-
-    return parsed_response.error if parsed_response.failure?
-
-    ::Weather::Decorator.new(city).tell_weather_forecast(parsed_response)
+  def decorator
+    ::Weather::Decorator.new(city)
   end
 
   def send_message(text, **options)
