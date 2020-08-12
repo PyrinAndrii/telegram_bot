@@ -16,7 +16,7 @@ class TelegramBot
 
   def run
     bot.listen do |message|
-      @chat_id ||= message.chat.id
+      @chat_id = message.chat.id
 
       case message.text
       when START
