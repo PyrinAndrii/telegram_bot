@@ -10,6 +10,8 @@ module Weather
       @weather_per_day = {}
       @average_weather_per_day = {}
 
+      # TODO: Нарушение single responsibility principle (SOLID)
+
       parse_weather_per_day
       calculate_average_weather_per_day
     end

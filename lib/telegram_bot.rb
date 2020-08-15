@@ -20,6 +20,9 @@ class TelegramBot
 
       case message.text
       when START
+        # TODO: Чтобы избежать боли создания множества переменных
+        # с подобным текстом лучше использовать https://github.com/ruby-i18n/i18n,
+        # таким образом всегда будет понятно в какой файл идти чтобы поменять тот или иной текст
         question = "Do you want to know #{CURRENT_WEATHER} or #{WEATHER_FORECAST}?"
 
         send_message(question, reply_markup: weather_keyboard)
@@ -54,6 +57,9 @@ class TelegramBot
     response = WEATHER_API[forecast_type].new(city).response
     parsed_response = ::Weather::ResponseParser.new(response.body)
 
+    # TODO: decorator.send
+    # Не понял почему используется send (который может вызывать приватные методы),
+    # а не public_send. 
     parsed_response.error || decorator.send(WEATHER_METHOD[forecast_type],
                                             parsed_response)
   end
@@ -77,6 +83,13 @@ class TelegramBot
   def choose_forecast_type
     "Next type /start and choose either #{CURRENT_WEATHER} or #{WEATHER_FORECAST}"
   end
+
+  # TODO: С увелечением количества action'ов у бота этот файл будет сложно читаемый
+  # с огромным числом строк. В качестве альтернативы предложил бы использовать паттерн
+  # стратегия (https://github.com/davidgf/design-patterns-in-ruby/blob/master/strategy.md)
+  # и разбить каждый action на отдельный класс наследуемый от базового (lib/actions/*).
+  #
+  # P.S. Нарушение принципа single responsibility principle [SOLID]
 
   def tell_instruction
     instruction = "Please type /city {city_name} where 'city_name' is the city you want to know the weather about\n"
