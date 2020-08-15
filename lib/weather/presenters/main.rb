@@ -1,6 +1,9 @@
 module Weather
   module Presenters
     class Main
+      # TODO: Вместо метода parse_data рекомендовал бы использовать гем dry-struct
+      # https://dry-rb.org/gems/dry-struct/1.0/
+
       attr_accessor :temp, :feels_like, :temp_min, :temp_max
 
       def initialize(main)

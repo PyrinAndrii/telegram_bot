@@ -4,7 +4,9 @@ module Weather
     attr_reader :cod, :current_weather, :forecast_list, :error
 
     def initialize(resp)
+      # TODO: нейминг  локальной переменной resp. Почему не response?
       @response = JSON.parse(resp, symbolize_names: true)
+      # TODO: не понятно из нейминга переменной что это за код (@cod)
       @cod = response.dig(:cod).to_i
 
       parse_response(resp)
