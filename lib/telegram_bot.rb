@@ -1,19 +1,22 @@
+# frozen_string_literal: true
+
 class TelegramBot
-  TOKEN = ENV['TELEGRAM_BOT_API_TOKEN']
+  TOKEN = ENV.fetch('TELEGRAM_BOT_API_TOKEN')
 
   START = '/start'
   STOP  = '/stop'
 
   WEATHER_API = {
-    CURRENT_WEATHER  => ::Weather::API::CurrentWeather,
+    CURRENT_WEATHER => ::Weather::API::CurrentWeather,
     WEATHER_FORECAST => ::Weather::API::WeatherForecast
-  }
+  }.freeze
 
   WEATHER_METHOD = {
-    CURRENT_WEATHER  => :tell_current_weather,
+    CURRENT_WEATHER => :tell_current_weather,
     WEATHER_FORECAST => :tell_weather_forecast
-  }
+  }.freeze
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def run
     bot.listen do |message|
       @chat_id = message.chat.id
@@ -41,6 +44,7 @@ class TelegramBot
       end
     end
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   private
 
@@ -90,7 +94,7 @@ class TelegramBot
   end
 
   def send_message(text, **options)
-    required_options = { chat_id: chat_id, text: text }
+    required_options = { chat_id:, text: }
     options.merge! required_options
 
     bot.api.send_message(options)

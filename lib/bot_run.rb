@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # additional ruby libraries
 require 'forwardable'
 require 'date'

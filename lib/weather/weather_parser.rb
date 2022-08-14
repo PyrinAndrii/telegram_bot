@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Weather
   class WeatherParser
     extend Forwardable
@@ -10,10 +12,10 @@ module Weather
     def initialize(weather_data)
       @wind = weather_data.dig(:wind, :speed).to_f
 
-      @parsed_main_data = Presenters::Main.new(weather_data.dig(:main))
-      @parsed_weather   = Presenters::Weather.new(weather_data.dig(:weather))
+      @parsed_main_data = Presenters::Main.new(weather_data[:main])
+      @parsed_weather   = Presenters::Weather.new(weather_data[:weather])
 
-      additional_info(weather_data.dig(:dt_txt))
+      additional_info(weather_data[:dt_txt])
     end
 
     def additional_info(dt_txt)

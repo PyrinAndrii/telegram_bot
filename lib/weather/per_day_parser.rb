@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Weather
   class PerDayParser
     attr_accessor :weather_per_day, :average_weather_per_day

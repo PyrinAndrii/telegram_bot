@@ -1,16 +1,17 @@
+# frozen_string_literal: true
+
 module Weather
   class ResponseParser
-
     attr_reader :cod, :current_weather, :forecast_list, :error
 
     def initialize(resp)
       @response = JSON.parse(resp, symbolize_names: true)
-      @cod = response.dig(:cod).to_i
+      @cod = response[:cod].to_i
 
       parse_response(resp)
     end
 
-    def parse_response(resp)
+    def parse_response(_resp)
       success? ? parse_data : error_message
     end
 
@@ -27,7 +28,7 @@ module Weather
     attr_reader :response
 
     def parse_data
-      text_list = response.dig(:list)
+      text_list = response[:list]
       return parse_current_weather unless text_list
 
       @forecast_list = text_list.map { |item| parse_item(item) }
@@ -42,7 +43,7 @@ module Weather
     end
 
     def error_message
-      @error = response.dig(:message)
+      @error = response[:message]
     end
   end
 end
