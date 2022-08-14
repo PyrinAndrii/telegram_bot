@@ -58,7 +58,7 @@ class TelegramBot
     response = WEATHER_API[forecast_type].new(city).response
     parsed_response = ::Weather::ResponseParser.new(response.body)
 
-    parsed_response.error || decorator.send(WEATHER_METHOD[forecast_type],
+    parsed_response.error || decorator.public_send(WEATHER_METHOD[forecast_type],
                                             parsed_response)
   end
 
